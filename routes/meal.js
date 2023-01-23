@@ -94,17 +94,6 @@ router.post("/", userAuth, async (req, res) => {
 
     const createdMeal = await Meal.create(meal);
 
-    await User.updateOne(
-      {
-        _id: req.user._id,
-      },
-      {
-        $push: {
-          meals: [createdMeal._id],
-        },
-      }
-    );
-
     return res.status(200).json({
       success: true,
       message: "Success",
