@@ -38,6 +38,20 @@ router.get("/", userAuth, async (req, res) => {
   }
 });
 
+router.get("/:id", userAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const meal = await Meal.findOne({ userId: req.user._id, _id: id });
+    return res.status(200).json(meal);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
 router.post("/", userAuth, async (req, res) => {
   try {
     let { name, time, calories } = req.body;
