@@ -17,7 +17,7 @@ const User = require("../Models/userModel");
 
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, isAdmin } = req.body;
 
     if (!email || !name || !password) {
       return res.status(403).json({
@@ -63,6 +63,7 @@ router.post("/signup", async (req, res) => {
       email,
       name,
       password: encryptedPassword,
+      isAdmin,
     };
 
     await User.create(user);
