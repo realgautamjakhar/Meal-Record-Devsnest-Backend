@@ -101,13 +101,6 @@ router.delete("/meal/:id", userAuth, isAdmin, async (req, res) => {
       });
     }
 
-    // >>> Updating the user array of meal
-    await User.findByIdAndUpdate(meal.userId, {
-      $pull: {
-        meals: Object(id),
-      },
-    });
-
     // >>> Deleting the meal in meal collection
     await Meal.findByIdAndDelete(id);
 
