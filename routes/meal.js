@@ -55,7 +55,6 @@ router.get("/:id", userAuth, async (req, res) => {
 router.post("/", userAuth, async (req, res) => {
   try {
     let { name, time, calories } = req.body;
-
     if (!calories) {
       try {
         const response = await fetch(
