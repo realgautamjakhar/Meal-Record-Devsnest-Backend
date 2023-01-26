@@ -9,6 +9,9 @@ const router = express.Router();
 router.get("/meal", userAuth, isAdmin, async (req, res) => {
   try {
     const { page, limit, calories, search } = req.query;
+    console.log("====================================");
+    console.log(page, limit, calories, search);
+    console.log("====================================");
     const pageNum = page ? parseInt(page) : 1;
     const limitNum = limit ? parseInt(limit) : 10;
     const skip = (pageNum - 1) * limitNum;
@@ -26,6 +29,18 @@ router.get("/meal", userAuth, isAdmin, async (req, res) => {
     const meals = await Meal.find(query).skip(skip).limit(limitNum);
     const total = await Meal.countDocuments(query);
     return res.status(200).json({ meals, total });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/users", userAuth, isAdmin, async (req, res) => {
+  try {
+    const users = await User.find().limit(20);
+    return res.status(200).json(users);
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -58,7 +73,7 @@ router.get("/privilege/:id", userAuth, isAdmin, async (req, res) => {
         isAdmin: false,
       });
 
-      return res.status(404).json({
+      return res.status(200).json({
         success: true,
         message: `${user.name} is Demoted to User`,
       });

@@ -20,7 +20,7 @@ router.post("/signup", async (req, res) => {
     const { name, email, password, isAdmin } = req.body;
 
     if (!email || !name || !password) {
-      return res.status(403).json({
+      return res.status(406).json({
         success: false,
         error: "Please fill Required Fields",
       });
@@ -28,20 +28,20 @@ router.post("/signup", async (req, res) => {
 
     //Validation
     if (!validateName(name)) {
-      return res.status(200).json({
+      return res.status(406).json({
         success: false,
         error: "Please Enter name",
       });
     }
 
     if (!validateEmail(email)) {
-      return res.status(200).json({
+      return res.status(406).json({
         success: false,
         error: "Please Enter valid email",
       });
     }
     if (!validatePassword(password)) {
-      return res.status(200).json({
+      return res.status(406).json({
         success: false,
         error:
           "Please Enter valid Password with length of 6 contain atleast one digit and special character",
@@ -86,20 +86,20 @@ router.post("/signin", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(403).json({
+      return res.status(406).json({
         success: false,
         error: "Please fill Required Fields",
       });
     }
 
     if (!validateEmail(email)) {
-      return res.status(200).json({
+      return res.status(406).json({
         success: false,
         error: "Invalid email",
       });
     }
     if (!validatePassword(password)) {
-      return res.status(200).json({
+      return res.status(406).json({
         success: false,
         error:
           "Please Enter valid Password with length of 6 contain atleast one digit and special character",
@@ -118,7 +118,7 @@ router.post("/signin", async (req, res) => {
     const comparePassword = await bcrypt.compare(password, user.password);
 
     if (!comparePassword) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         error: "Please enter Valid Credientials",
       });
@@ -131,15 +131,14 @@ router.post("/signin", async (req, res) => {
     };
     const token = await jwt.sign(payload, process.env.JWT_SECRET);
 
-    const options = {
-      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      secure: false,
-      sameSite: "none",
-    };
     return res
       .status(200)
-      .cookie("token", token, options)
+      .cookie("token", token, {
+        httpOnly: true,
+        sameSite: "None",
+        secure: false,
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+      })
       .json({
         token,
         success: true,
@@ -163,13 +162,25 @@ router.post("/signin", async (req, res) => {
 router.get("/me", userAuth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
+    const payload = {
+      user: {
+        id: user._id,
+      },
+    };
+    const token = await jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1hr",
+    });
+
     if (!user) {
       return res.status(404).json({
         success: false,
         error: "Unable to find User Please login Again",
       });
     }
-    return res.status(200).json({ success: true, message: "Logged In", user });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Logged In", user, token });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -245,7 +256,7 @@ router.post("/reset-password/:token", async (req, res) => {
     const { password } = req.body;
 
     if (!validatePassword(password)) {
-      return res.status(200).json({
+      return res.status(406).json({
         success: false,
         error:
           "Please Enter valid Password with length of 6 contain atleast one digit and special character",
@@ -260,7 +271,7 @@ router.post("/reset-password/:token", async (req, res) => {
 
     if (!user) {
       return res
-        .status(404)
+        .status(403)
         .json({ success: false, error: "Invalid or expired token" });
     }
 
@@ -285,7 +296,7 @@ router.post("/reset-password/:token", async (req, res) => {
         message: "Password Updated Successfully",
       });
     } else {
-      return res.status(501).json({
+      return res.status(500).json({
         success: false,
         error: `Something Went Wrong`,
       });
