@@ -9,9 +9,6 @@ const router = express.Router();
 router.get("/meal", userAuth, isAdmin, async (req, res) => {
   try {
     const { page, limit, calories, search } = req.query;
-    console.log("====================================");
-    console.log(page, limit, calories, search);
-    console.log("====================================");
     const pageNum = page ? parseInt(page) : 1;
     const limitNum = limit ? parseInt(limit) : 10;
     const skip = (pageNum - 1) * limitNum;
@@ -42,6 +39,22 @@ router.get("/users", userAuth, isAdmin, async (req, res) => {
     const users = await User.find().limit(20);
     return res.status(200).json(users);
   } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/stats", userAuth, isAdmin, async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    const mealCount = await Meal.countDocuments();
+    const adminCount = await User.find({ isAdmin: true }).countDocuments();
+
+    return res.status(200).json({ userCount, mealCount, adminCount });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       error: "Internal Server Error",
