@@ -106,7 +106,11 @@ router.post("/signin", async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email }).select("-password");
+
+    console.log("====================================");
+    console.log(user);
+    console.log("====================================");
 
     if (!user) {
       return res.status(404).json({
@@ -143,12 +147,7 @@ router.post("/signin", async (req, res) => {
         token,
         success: true,
         message: `Welcome ${user.name}`,
-        user: {
-          name: user.name,
-          email: user.email,
-          id: user._id,
-          createdAt: user.timeStamp,
-        },
+        user,
       });
   } catch (error) {
     return res.status(500).json({
