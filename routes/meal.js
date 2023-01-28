@@ -1,10 +1,18 @@
 require("dotenv").config();
+const axios = require("axios");
 const express = require("express");
 const userAuth = require("../middlewares/userAuth");
 const Meal = require("../Models/mealModel");
 const User = require("../Models/userModel");
 const router = express.Router();
-
+const axiosConfig = {
+  headers: {
+    "x-app-id": process.env.NUTRITIONIX_X_ID,
+    "x-app-key": process.env.NUTRITIONIX_X_KEY,
+    "x-remote-user-id": 1,
+    "Content-Type": "application/json",
+  },
+};
 //>>> Get request for the user to fetch all the meal
 router.get("/", userAuth, async (req, res) => {
   try {
@@ -56,22 +64,13 @@ router.post("/", userAuth, async (req, res) => {
     let { name, time, calories } = req.body;
     if (!calories) {
       try {
-        const response = await fetch(
+        const postData = JSON.stringify({ query: name });
+        const response = await axios.post(
           "https://trackapi.nutritionix.com/v2/natural/nutrients",
-          {
-            method: "POST",
-            headers: {
-              "x-app-id": process.env.NUTRITIONIX_X_ID,
-              "x-app-key": process.env.NUTRITIONIX_X_KEY,
-              "x-remote-user-id": 1,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              query: name,
-            }),
-          }
+          postData,
+          axiosConfig
         );
-        const result = await response.json();
+        const result = await response.data;
         if (result.foods) {
           calories = result?.foods[0]?.nf_calories;
         }
