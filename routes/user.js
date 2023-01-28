@@ -85,6 +85,9 @@ router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log("====================================");
+    console.log(email, password);
+    console.log("====================================");
     if (!email || !password) {
       return res.status(406).json({
         success: false,
@@ -106,11 +109,7 @@ router.post("/signin", async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email }).select("-password");
-
-    console.log("====================================");
-    console.log(user);
-    console.log("====================================");
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({
@@ -150,9 +149,12 @@ router.post("/signin", async (req, res) => {
         user,
       });
   } catch (error) {
+    console.log("====================================");
+    console.log(error.message);
+    console.log("====================================");
     return res.status(500).json({
       success: false,
-      error,
+      error: error.message,
     });
   }
 });
