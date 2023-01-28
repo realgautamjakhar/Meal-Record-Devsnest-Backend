@@ -33,7 +33,10 @@ router.get("/", userAuth, async (req, res) => {
       };
     }
 
-    const meals = await Meal.find(query).skip(skip).limit(limitNum);
+    const meals = await Meal.find(query)
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
     const total = await Meal.countDocuments(query);
     return res.status(200).json({ meals, total });
   } catch (error) {
