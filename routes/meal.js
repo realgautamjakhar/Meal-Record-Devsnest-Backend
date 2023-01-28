@@ -70,16 +70,12 @@ router.post("/", userAuth, async (req, res) => {
           postData,
           axiosConfig
         );
-        const result = await response.data;
-        if (result.foods) {
+        const result = response.data;
+        if (result?.foods) {
           calories = result?.foods[0]?.nf_calories;
         }
       } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-          success: false,
-          error: "Internal Server Error",
-        });
+        console.log(error.response.data.message);
       }
     }
 
