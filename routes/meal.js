@@ -1,5 +1,4 @@
 require("dotenv").config();
-import fetch from "node-fetch";
 const express = require("express");
 const userAuth = require("../middlewares/userAuth");
 const Meal = require("../Models/mealModel");
