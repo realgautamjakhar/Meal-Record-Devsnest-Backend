@@ -144,4 +144,52 @@ router.delete("/meal/:id", userAuth, isAdmin, async (req, res) => {
   }
 });
 
+router.put("/meal/:id", userAuth, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, calories, time } = req.body;
+    if (!id) {
+      return res.status(404).json({
+        success: false,
+        error: "Provide Id",
+      });
+    }
+
+    // >>> Find the meal in database
+    const meal = await Meal.findById(id);
+
+    if (!meal) {
+      return res.status(404).json({
+        success: false,
+        error: "Meal with id provided not found",
+      });
+    }
+    const updatedMeal = {
+      name,
+      calories,
+      time,
+    };
+    const updatingMeal = await Meal.updateOne(
+      { _id: id },
+      { $set: updatedMeal }
+    );
+    if (updatingMeal.modifiedCount > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Meal Updated SuccessFully",
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: "No Changes Applied to Meal",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = router;
